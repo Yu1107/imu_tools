@@ -1,34 +1,3 @@
-/*
-  @author Roberto G. Valenti <robertogl.valenti@gmail.com>
-
-	@section LICENSE
-  Copyright (c) 2015, City University of New York
-  CCNY Robotics Lab <http://robotics.ccny.cuny.edu>
-	All rights reserved.
-
-	Redistribution and use in source and binary forms, with or without
-	modification, are permitted provided that the following conditions are met:
-     1. Redistributions of source code must retain the above copyright
-        notice, this list of conditions and the following disclaimer.
-     2. Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution.
-     3. Neither the name of the City College of New York nor the
-        names of its contributors may be used to endorse or promote products
-        derived from this software without specific prior written permission.
-
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-	DISCLAIMED. IN NO EVENT SHALL the CCNY ROBOTICS LAB BE LIABLE FOR ANY
-	DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
 #include "imu_complementary_filter/complementary_filter_ros.h"
 
 #include <std_msgs/Float64.h>
@@ -54,7 +23,7 @@ ComplementaryFilterROS::ComplementaryFilterROS(
   if (publish_debug_topics_)
   {
       rpy_publisher_ = nh_.advertise<geometry_msgs::Vector3Stamped>(
-                  ros::names::resolve("imu") + "/rpy/filtered", queue_size);
+                  ros::names::resolve("imu") + "/rpy/complementary_filtered", queue_size);
 
       if (filter_.getDoBiasEstimation())
       {
@@ -97,7 +66,7 @@ void ComplementaryFilterROS::initializeParams()
   bool do_adaptive_gain;
 
   if (!nh_private_.getParam ("fixed_frame", fixed_frame_))
-    fixed_frame_ = "odom";
+    fixed_frame_ = "phone_link";
   if (!nh_private_.getParam ("use_mag", use_mag_))
     use_mag_ = false;
   if (!nh_private_.getParam ("publish_tf", publish_tf_))
@@ -107,7 +76,7 @@ void ComplementaryFilterROS::initializeParams()
   if (!nh_private_.getParam ("constant_dt", constant_dt_))
     constant_dt_ = 0.0;
   if (!nh_private_.getParam ("publish_debug_topics", publish_debug_topics_))
-    publish_debug_topics_ = false;
+    publish_debug_topics_ = true;
   if (!nh_private_.getParam ("gain_acc", gain_acc))
     gain_acc = 0.01;
   if (!nh_private_.getParam ("gain_mag", gain_mag))

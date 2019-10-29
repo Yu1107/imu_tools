@@ -39,17 +39,17 @@ ImuFilterRos::ImuFilterRos(ros::NodeHandle nh, ros::NodeHandle nh_private):
   if (!nh_private_.getParam ("stateless", stateless_))
     stateless_ = false;
   if (!nh_private_.getParam ("use_mag", use_mag_))
-   use_mag_ = true;
+   use_mag_ = false;
   if (!nh_private_.getParam ("publish_tf", publish_tf_))
    publish_tf_ = true;
   if (!nh_private_.getParam ("reverse_tf", reverse_tf_))
    reverse_tf_ = false;
   if (!nh_private_.getParam ("fixed_frame", fixed_frame_))
-   fixed_frame_ = "odom";
+   fixed_frame_ = "imu";
   if (!nh_private_.getParam ("constant_dt", constant_dt_))
     constant_dt_ = 0.0;
   if (!nh_private_.getParam ("publish_debug_topics", publish_debug_topics_))
-    publish_debug_topics_= false;
+    publish_debug_topics_= true;
 
   // For ROS Jade, make this default to true.
   if (!nh_private_.getParam ("use_magnetic_field_msg", use_magnetic_field_msg_))
@@ -59,7 +59,7 @@ ImuFilterRos::ImuFilterRos(ros::NodeHandle nh, ros::NodeHandle nh_private):
           ROS_WARN("Deprecation Warning: The parameter use_magnetic_field_msg was not set, default is 'false'.");
           ROS_WARN("Starting with ROS Jade, use_magnetic_field_msg will default to 'true'!");
       }
-      use_magnetic_field_msg_ = false;
+      use_magnetic_field_msg_ = true;
   }
 
   std::string world_frame;
@@ -109,7 +109,7 @@ ImuFilterRos::ImuFilterRos(ros::NodeHandle nh, ros::NodeHandle nh_private):
   if (publish_debug_topics_)
   {
     rpy_filtered_debug_publisher_ = nh_.advertise<geometry_msgs::Vector3Stamped>(
-      ros::names::resolve("imu") + "/rpy/filtered", 5);
+      ros::names::resolve("imu") + "/rpy/madgwick_filtered", 5);
 
     rpy_raw_debug_publisher_ = nh_.advertise<geometry_msgs::Vector3Stamped>(
       ros::names::resolve("imu") + "/rpy/raw", 5);
@@ -132,12 +132,12 @@ ImuFilterRos::ImuFilterRos(ros::NodeHandle nh, ros::NodeHandle nh_private):
     else
     {
       mag_subscriber_.reset(new MagSubscriber(
-        nh_, ros::names::resolve("imu") + "/magnetic_field", queue_size));
+        nh_, ros::names::resolve("imu") + "/mag", queue_size));
 
       // Initialize the shim to support republishing Vector3Stamped messages from /mag as MagneticField
       // messages on the /magnetic_field topic.
       mag_republisher_ = nh_.advertise<MagMsg>(
-        ros::names::resolve("imu") + "/magnetic_field", 5);
+        ros::names::resolve("imu") + "/mag", 5);
       vector_mag_subscriber_.reset(new MagVectorSubscriber(
         nh_, ros::names::resolve("imu") + "/mag", queue_size));
       vector_mag_subscriber_->registerCallback(&ImuFilterRos::imuMagVectorCallback, this);
